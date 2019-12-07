@@ -10,19 +10,32 @@ let rooms = {
   }
 }
 
+let ws2room = {
+
+}
+
 uws.App()
 .ws('/:name', {
     compression:0,
     open: (ws,req)=>{
-        let roomName = req.getParameter('name')
-        rooms[roomName].objects.push({ws,x:10,y:10})
-        console.log(ws.getRemoteAddress())
+      let roomName = req.getParameter('name')
+      let remoteAddress = Buffer.from(ws.getRemoteAddress()).toString('base64')
+      rooms[roomName].objects.push({id:remoteAddress,ws,x:10,y:10})
+      ws2room[remoteAddress] = roomName
     },
     close: (ws,code,message) =>{
       console.log(ws,code,message)
     },
     message:(ws,message,isBinary)=>{
-        let ok = ws.send(message, isBinary)
+      let remoteAddress = Buffer.from(ws.getRemoteAddress()).toString('base64')
+      let roomName = ws2room[remoteAddress]
+      let room = rooms[roomName]
+      let obj = room.objects.find(i=>i.id==remoteAddress)
+
+
+      let processedMsg = JSON.parse(Buffer.from(message).toString('utf-8'))
+      obj.x += processedMsg.x
+      obj.y += processedMsg.y
     }
 })
 .get('/room/:name', (req,res)=>{
@@ -56,15 +69,15 @@ uws.App()
     req.end(JSON.stringify({ok:true, result:rooms[roomName]}))
 })
 .get('/game/*', (req,res)=>{
-    req.end(gameHtml)
+  req.end(gameHtml)
 })
 .any('/*', (req,res)=>{
-    req.end(indexHtml)
+  req.end(indexHtml)
 })
 .listen(9090, (listenSocket)=>{
-    if(listenSocket){
-        console.log('Listen port 9090')
-    }
+  if(listenSocket){
+      console.log('Listen port 9090')
+  }
 })
 
 let tick = ()=>{
@@ -87,4 +100,4 @@ let tick = ()=>{
     }
 }
 
-setInterval(tick, 100)
+setInterval(tick, 33)

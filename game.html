@@ -17,29 +17,44 @@
 
         let path = document.location.pathname.split('/')
         let roomName = path[path.length-1]
-        let socket  = new WebSocket(`ws://localhost:9090/${roomName}`)
+        let socket  = new WebSocket(`ws://192.168.1.5:9090/${roomName}`)
+        let keys = {}
         socket.onopen = ()=>{
             console.log("Connected")
+            document.body.addEventListener("keydown", function (e) {
+                keys[e.keyCode] = true;
+            });
+            document.body.addEventListener("keyup", function (e) {
+                keys[e.keyCode] = false;
+            });
 
-            window.addEventListener('keydown', (e)=>{
-                let code = e.keyCode
-                switch (code) {
-                    case 37:
-                        socket.send('l')
-                        break;
-                    case 38:
-                        socket.send('u')
-                        break;
-                    case 39:
-                        socket.send('r')
-                        break;
-                    case 40:
-                        socket.send('d')
-                        break;
-                    default:
-                        break;
-                }
-            }, false)
+            setInterval(sendDelta, 33)
+        }
+
+        let sendDelta = ()=>{
+          let delta = {x:0, y:0}
+          let pressed = false
+          for (const key in keys) {
+            if(keys[key]){
+              switch(key){
+                case '65':
+                  delta.x -= 2
+                  break;
+                case '87':
+                  delta.y -= 2
+                  break;
+                case '68':
+                  delta.x += 2
+                  break;
+                case '83':
+                  delta.y += 2
+                  break;
+                default:break
+              }
+            }
+          }
+          
+          socket.send(JSON.stringify(delta))
         }
 
         socket.onclose = ()=>{
@@ -47,17 +62,16 @@
         }
 
         socket.onmessage = (event)=>{
-            console.log(event.data)
-            // ctx.fillStyle = 'white'
-            // ctx.fillRect(0,0,500,500)
+            ctx.fillStyle = 'white'
+            ctx.fillRect(0,0,500,500)
 
-            // let objects = JSON.parse(event)
-            // for (let i = 0; i < object.length; i++) {
-            //     ctx.beginPath()
-            //     ctx.arc(objects[i].x, objects[i].y, 5,0,2*3.14, false)
-            //     ctx.stroke()
+            let objects = JSON.parse(event.data)
+            for (let i = 0; i < objects.length; i++) {
+                ctx.beginPath()
+                ctx.arc(objects[i].x, objects[i].y, 5,0,2*3.14, false)
+                ctx.stroke()
                 
-            // }
+            }
         }
 
 
