@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Game</title>
+</head>
+<body>
+    <h1>RPG game</h1>
+
+    <h3>Select room or create new</h3>
+    <input type="text" id="room_name"/>
+    <button id="create">Create</button>
+    <button id="connect">Connect</button>
+    
+    <script>
+        let roomName = document.getElementById('room_name')
+        let create = document.getElementById('create')
+        let connect = document.getElementById('connect')
+
+        create.onclick = async ()=>{
+            let rm = roomName.value
+            let rawRes = await fetch(`/room/${rm}/create`,{
+                method:'post'
+            })
+            let res = await rawRes.json()
+            if(res.ok){
+                alert('Комната создана')
+            }
+            else{
+                alert(res.error)
+            }
+        }
+        
+        connect.onclick = async ()=>{
+            let rm = roomName.value
+            let rawRes = await fetch(`/room/${rm}`,{
+                method:'get'
+            })
+            let res = await rawRes.json()
+
+            if(res.ok){
+                window.location.replace(`/game/${res.result.name}`)
+            }
+        }
+    </script>
+</body>
+</html>

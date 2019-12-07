@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Game</title>
+</head>
+<body>
+    <canvas width="500" height="500" id="game">
+
+    </canvas>
+
+    <script>
+        let gcanvas = document.getElementById('game')
+        let ctx = gcanvas.getContext('2d')
+
+        let path = document.location.pathname.split('/')
+        let roomName = path[path.length-1]
+        let socket  = new WebSocket(`ws://localhost:9090/${roomName}`)
+        socket.onopen = ()=>{
+            console.log("Connected")
+
+            window.addEventListener('keydown', (e)=>{
+                let code = e.keyCode
+                switch (code) {
+                    case 37:
+                        socket.send('l')
+                        break;
+                    case 38:
+                        socket.send('u')
+                        break;
+                    case 39:
+                        socket.send('r')
+                        break;
+                    case 40:
+                        socket.send('d')
+                        break;
+                    default:
+                        break;
+                }
+            }, false)
+        }
+
+        socket.onclose = ()=>{
+            console.log('closed')
+        }
+
+        socket.onmessage = (event)=>{
+            console.log(event.data)
+            // ctx.fillStyle = 'white'
+            // ctx.fillRect(0,0,500,500)
+
+            // let objects = JSON.parse(event)
+            // for (let i = 0; i < object.length; i++) {
+            //     ctx.beginPath()
+            //     ctx.arc(objects[i].x, objects[i].y, 5,0,2*3.14, false)
+            //     ctx.stroke()
+                
+            // }
+        }
+
+
+    </script>
+</body>
+</html>
