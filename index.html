@@ -15,12 +15,15 @@
     <button id="connect">Connect</button>
     
     <script>
+        // получение объектов поля ввода и кнопок
         let roomName = document.getElementById('room_name')
         let create = document.getElementById('create')
         let connect = document.getElementById('connect')
 
+        // подписываемся на клик по кнопку создать
         create.onclick = async ()=>{
             let rm = roomName.value
+            // отправка запроса на создание комнаты
             let rawRes = await fetch(`/room/${rm}/create`,{
                 method:'post'
             })
@@ -33,6 +36,7 @@
             }
         }
         
+        // Подписываемся на клик по кнопку присоедениться
         connect.onclick = async ()=>{
             let rm = roomName.value
             let rawRes = await fetch(`/room/${rm}`,{
@@ -41,6 +45,7 @@
             let res = await rawRes.json()
 
             if(res.ok){
+                //редиректим пользователя на страницу с игрой
                 window.location.replace(`/game/${res.result.name}`)
             }
         }
