@@ -12,15 +12,22 @@
     </canvas>
 
     <script>
+        //Получаем объект canvas
         let gcanvas = document.getElementById('game')
         let ctx = gcanvas.getContext('2d')
 
+        // получаем название комнаты
         let path = document.location.pathname.split('/')
         let roomName = path[path.length-1]
+        
+        //Подключаемся к WebSocket
         let socket  = new WebSocket(`ws://192.168.1.5:9090/${roomName}`)
         let keys = {}
+        
+        //Подписываемся на событие подключения к ws
         socket.onopen = ()=>{
             console.log("Connected")
+            // создаем обработчики нажатия на клавиши
             document.body.addEventListener("keydown", function (e) {
                 keys[e.keyCode] = true;
             });
@@ -28,6 +35,7 @@
                 keys[e.keyCode] = false;
             });
 
+            // Создаем поток для отправки изменения положения пользовательского объекта
             setInterval(sendDelta, 33)
         }
 
